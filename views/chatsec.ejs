@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="/chatsec.css">
+</head>
+<body>
+
+    <div id="hero">
+
+        <div id="lists">
+            <input type="text" id="searchUser" placeholder="Search to add">
+            <form method="post" action="/p2p">
+                    <input type="hidden" name="user1" value="<%=me._id %>">
+                    <input type="hidden" name="user2" value="<%=me._id %>">
+                    <div class="user" data-id="<%= me._id %>" data-name="<%= me.name %>" onclick="this.parentElement.submit()"><%= me.name %>&nbsp;(me)</div>
+                </form>
+            <%if(allfUser && allfUser.friends.length !=0) {%>
+            <%for(let user of allfUser.friends){%>
+                <%if(user.name!=me.name) {%>
+                <form method="post" action="/p2p">
+                    <input type="hidden" name="user1" value="<%=user.name_id %>">
+                    <input type="hidden" name="user2" value="<%=me._id %>">
+                    <div class="user" data-id="<%= user.name_id %>" data-name="<%= user.name %>" onclick="this.parentElement.submit()"><%= user.name %></div>
+                </form>
+                <%}%>
+            <%}%>
+            <%}%>
+        </div>
+
+        <div id="chats">
+            <div id="chat-box">
+                <div id="m1">
+                <div id="message1">
+                </div>
+                </div>
+                <div id="m2">
+                <div id="message2">
+                </div>
+            </div>
+            </div>
+            <div id="send-box">
+                <input type="text" id="sms" placeholder="Type message">
+                <button id="send-txt">Send</button>
+            </div>
+
+        </div>
+
+    </div>
+    <script>
+        const meself={
+            id:"<%=me._id%>",
+            name:"<%=me.name%>"
+        }
+        let search=document.getElementById("searchUser");
+        search.addEventListener("input",async()=>{
+            let text=search.value;
+            let responce= await fetch(`/search-user?name=${text}`);
+            let userinfo=await responce.json();
+            document.getElementById("lists").innerHTML=`<input type="text" id="searchUser" placeholder="Search user">
+            <form method="post" action="/p2p">
+                    <input type="hidden" name="user1" value="${userinfo._id }">
+                    <input type="hidden" name="user2" value="${meself.id}">
+                    <div class="user" data-id="${userinfo._id }" data-name="${userinfo.name}" onclick="this.parentElement.submit()">${userinfo.name}</div>
+                </form>`
+        });
+    </script>
+</body>
+</html>

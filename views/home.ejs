@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Signup</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init({
+                publicKey:"tVXJOdo46UrMXpef4",
+            });
+        })();
+    </script>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            background-color:black;
+            color:white;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            text-align:center;
+            font-family:verdana;
+            min-height:100vh;
+        }
+
+        #box{
+            width:400px;
+            background-color:rgb(20,20,20);
+            border:solid 1px rgb(60,60,60);
+            border-radius:20px;
+            padding:20px;
+            box-shadow:0px 0px 20px rgba(255,255,255,0.1);
+        }
+
+        #ascii{
+            font-size:12px;
+            text-align:center;
+            color:rgb(210,210,210);
+        }
+
+        form{
+            margin-top:20px;
+        }
+
+        input{
+            width:100%;
+            height:45px;
+            border:none;
+            border-radius:10px;
+            outline:none;
+            text-align:center;
+            background-color:rgb(35,35,35);
+            color:white;
+            margin-top:12px;
+            transition:0.3s;
+        }
+
+        input::placeholder{
+            color:rgb(170,170,170);
+        }
+        #emailid{
+            display:none;
+        }
+
+        button{
+            width:100%;
+            height:45px;
+            border-radius:10px;
+            margin-top:12px;
+            background-color:black;
+            color:white;
+            border:solid 1px white;
+            transition:0.5s;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background-color:white;
+            color:black;
+        }
+
+        #otps{
+            margin-top:15px;
+        }
+
+        #status{
+            margin-top:12px;
+            color:rgb(180,180,180);
+            font-size:14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="box">
+        <pre id="ascii"><%=txt%></pre>
+        <form method="post" action="/chats">
+            <input type="text" name="userName" id="username" placeholder="Unique id">
+            <input type="email" name="email" id="emailid" placeholder="Email">
+            <button type="button" id="cnf">Send OTP</button>
+        </form>
+        <input type="number" placeholder="OTP" id="otps">
+        <p id="status">Enter Username</p>
+    </div>
+    <script>
+        let uid=document.getElementById("username");
+        function generateOTP(){
+            return Math.floor(100000+Math.random()*900000);
+        }
+        let otp;
+        let userinfo=null;
+        uid.addEventListener("input",async()=>{
+            let text=uid.value;
+            if(text==""){
+                document.getElementById("emailid").style.display="none";
+                document.getElementById("cnf").innerText="Send OTP";
+                document.getElementById("status").innerText="Enter Username";
+                return;
+            }
+            let responce=await fetch(`/search-user?name=${text}`);
+            userinfo=await responce.json();
+            if(userinfo!=null){
+                document.getElementById("emailid").style.display="none";
+                document.getElementById("cnf").innerText="Login";
+                document.getElementById("status").innerText="Account Found";
+            }
+            else{
+                document.getElementById("emailid").style.display="block";
+                document.getElementById("cnf").innerText="Signup";
+                document.getElementById("status").innerText="Create Account";
+            }
+        });
+        document.getElementById("cnf").addEventListener("click",async(e)=>{
+            e.preventDefault();
+            if(uid.value==""){
+                uid.placeholder="Enter Unique id";
+                return;
+            }
+            otp=generateOTP();
+            var templateParams;
+            if(userinfo!=null){
+                templateParams={
+                    name:userinfo.name,
+                    email:userinfo.email,
+                    passcode:otp,
+                };
+            }
+            else{
+                let email=document.getElementById("emailid").value;
+                if(email==""){
+                    document.getElementById("emailid").placeholder="Enter Email Id";
+                    return;
+                }
+                templateParams={
+                    name:uid.value,
+                    email:email,
+                    passcode:otp,
+                };
+            }
+            emailjs.send('service_27dtauo','template_ybjg65m',templateParams).then(()=>{
+                document.getElementById("otps").placeholder="OTP Sent";
+                document.getElementById("status").innerText="Check Email";
+            });
+
+        });
+        document.getElementById("otps").addEventListener("input",()=>{
+            let userotp=document.getElementById("otps").value;
+            if(userotp==otp){
+                document.getElementById("status").innerText="Verified";
+                document.querySelector("form").submit();
+            }
+        });
+    </script>
+
+</body>
+</html>

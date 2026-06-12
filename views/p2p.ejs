@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="/p2ps.css">
+
+</head>
+<body>
+
+    <div id="hero">
+
+        <div id="lists">
+            <input type="text" id="searchUser" placeholder="Search to add">
+            <form method="post" action="/p2p">
+                    <input type="hidden" name="user1" value="<%=snname._id %>">
+                    <input type="hidden" name="user2" value="<%=snname._id %>">
+                    <div class="user" data-id="<%= snname._id %>" data-name="<%= snname.name %>" onclick="this.parentElement.submit()"><%= snname.name %>&nbsp;(me)</div>
+                </form>
+            <%if(allfUser && allfUser.friends.length !=0) {%>
+            <%for(let user of allfUser.friends){%>
+                <%if(user.name!=snname.name) {%>
+                <form method="post" action="/p2p">
+                    <input type="hidden" name="user1" value="<%=user.name_id %>">
+                    <input type="hidden" name="user2" value="<%=snname._id %>">
+                    <div class="user" data-id="<%= user.name_id %>" data-name="<%= user.name %>" onclick="this.parentElement.submit()"><%= user.name %></div>
+                </form>
+                <%}%>
+            <%}%>
+            <%}%>
+        </div>
+
+        <div id="chats">
+            <div id="receiver-name"><%=rnname.name%></div>
+            <div id="chat-box">
+                <%for(let chat of chatHistory.chats){%>
+                    <%if(chat.receiver==snname.name) {%>
+                        <div id="m1">
+                            <div id="message1">
+                                <%=chat.txt%>
+                            </div>
+                        </div>
+                    <%}else{%>
+                        <div id="m2">
+                            <div id="message1">
+                                <%=chat.txt%>
+                            </div>
+                        </div>
+                    <%}%>
+                <%}%>
+            </div>
+            <div id="send-box">
+                <input type="text" id="sms" placeholder="Type message">
+                <button id="send-txt">Send</button>
+            </div>
+
+        </div>
+
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket=io();
+        const me={
+            id:"<%=snname._id%>",
+            name:"<%=snname.name%>"
+        }
+        let selectSender={
+            id:"<%=rnname._id%>",
+            name:"<%=rnname.name%>"
+        }
+        let roomId;
+        roomId=[me.id,selectSender.id].sort().join("_");
+        socket.emit("join-room",roomId);
+        let boxs=document.querySelectorAll('.user');
+        boxs.forEach((box)=>{
+            box.addEventListener('click',()=>{
+                selectSender={
+                    id:box.dataset.id,
+                    name:box.dataset.name
+                }
+                roomId=[snname.id,selectSender.id].sort().join("_");
+                socket.emit("join-room",roomId);
+            });
+        });
+        document.getElementById("send-txt").addEventListener("click",()=>{
+            const msg=document.getElementById("sms").value;
+            let apnd=`<div id="m2">
+                            <div id="message2">
+                                ${msg}
+                            </div>
+                        </div>`;
+            document.getElementById("chat-box").innerHTML+=apnd;
+            const chatBox=document.getElementById("chat-box");
+            chatBox.scrollTop=chatBox.scrollHeight;
+            chatBox.scrollTop=chatBox.scrollHeight;
+            document.getElementById("sms").value="";
+            socket.emit("send-msg",{
+                smsg:msg,
+                room:roomId,
+                receiver:selectSender.name
+
+            });
+        });
+        document.getElementById("sms").addEventListener("keypress",(e)=>{
+            if(e.key=="Enter"){
+                document.getElementById("send-txt").click();
+            }
+        });
+        socket.on("received-msg",(data)=>{
+            if(data.receiver==me.name){
+                let apnd=`<div id="m1">
+                            <div id="message1">
+                                ${data.msgg}
+                            </div>
+                        </div>`;
+                document.getElementById("chat-box").innerHTML+=apnd;
+                const chatBox=document.getElementById("chat-box");
+                chatBox.scrollTop=chatBox.scrollHeight;
+            }
+            
+        });
+
+        let search=document.getElementById("searchUser");
+        search.addEventListener("input",async()=>{
+            let text=search.value;
+            let responce= await fetch(`/search-user?name=${text}`);
+            let userinfo=await responce.json();
+            document.getElementById("lists").innerHTML=`<input type="text" id="searchUser" placeholder="Search user">
+            <form method="post" action="/p2p">
+                    <input type="hidden" name="user1" value="${userinfo._id }">
+                    <input type="hidden" name="user2" value="${me.id}">
+                    <div class="user" data-id="${userinfo._id }" data-name="${userinfo.name}" onclick="this.parentElement.submit()">${userinfo.name}</div>
+                </form>`
+        });
+    </script>
+</body>
+</html>

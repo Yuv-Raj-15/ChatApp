@@ -164,6 +164,3 @@ https://raw.githubusercontent.com/Yuv-Raj-15/ChatApp/main/linkedin.mp4
 
 ---
 
-## 📄 License
-
-MIT

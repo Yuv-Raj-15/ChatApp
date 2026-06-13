@@ -158,7 +158,12 @@ npm install express mongoose socket.io ejs figlet dotenv
 
 A walkthrough tutorial is available to help you get started with the app.
 
-<video src="https://github.com/Yuv-Raj-15/ChatApp/blob/main/linkedin.mp4" controls width="100%"></video>
+
+
+https://github.com/user-attachments/assets/ab4f07a3-b343-4ae0-b331-8bf329ad04c2
+
+
+
 
 > 📌 **Tip:** Download the video or view it on GitHub by navigating to `linkedin.mp4` in the repository.
 

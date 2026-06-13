@@ -165,7 +165,6 @@ https://github.com/user-attachments/assets/ab4f07a3-b343-4ae0-b331-8bf329ad04c2
 
 
 
-> 📌 **Tip:** Download the video or view it on GitHub by navigating to `linkedin.mp4` in the repository.
 
 ---
 

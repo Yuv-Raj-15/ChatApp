@@ -93,7 +93,7 @@
 
         #status{
             margin-top:12px;
-            color:rgb(180,180,180);
+            color:#ffffff;
             font-size:14px;
         }
     </style>
@@ -128,7 +128,7 @@
             userinfo=await responce.json();
             if(userinfo!=null){
                 document.getElementById("emailid").style.display="none";
-                document.getElementById("cnf").innerText="Login";
+                document.getElementById("cnf").innerText="Send OTP to Registered Email";
                 document.getElementById("status").innerText="Account Found";
             }
             else{
@@ -165,6 +165,8 @@
                 };
             }
             emailjs.send('service_27dtauo','template_ybjg65m',templateParams).then(()=>{
+                document.getElementById("cnf").style.backgroundColor="#7bf1a8";
+                document.getElementById("cnf").disabled=true;
                 document.getElementById("otps").placeholder="OTP Sent";
                 document.getElementById("status").innerText="Check Email";
             });
